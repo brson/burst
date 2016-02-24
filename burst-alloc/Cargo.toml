@@ -1,0 +1,10 @@
+[package]
+name = "burst-alloc"
+version = "0.1.0"
+authors = ["Brian Anderson <banderson@mozilla.com>"]
+
+# FIXME: For some reason I have to use the in-tree libc and can't get
+# the libc crate with default-features = false to work.
+#[dependencies.libc]
+#version = "0.2"
+#default-features = false

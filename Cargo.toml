@@ -1,0 +1,7 @@
+[package]
+name = "burst"
+version = "0.1.0"
+authors = ["Brian Anderson <banderson@mozilla.com>"]
+
+[dependencies]
+burst-pal-linux = { path = "burst-pal-linux" }
