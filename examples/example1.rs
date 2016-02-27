@@ -11,19 +11,19 @@ fn main() {
     let mut v = Vec::new();
     v.push(&cap, 1);
 
+    let mut v2 = Vec::new();
+    v2.push(&cap, 1);
+
     // Spawn a thread
-    burst::thread::spawn(&cap, |cap| {
-        let mut v = Vec::new();
-        v.push(&cap, 1);
-        drop(cap);
+    burst::thread::spawn(&cap, move || {
+        let _v2 = v2;
     });
 
-    // Drop caps so we can do no more allocations
+    // Drop caps so we can do no more allocations.
+    //
+    // This will poison the heap, page in and lock memory.
     drop(cap);
 
-    // Poison the allocator to ensure nobody circumvents our static
-    // protection by directly importing the allocator crate.
-    burst::poison();
+    // Run realtime application logic.
 
-    // Run the application
 }

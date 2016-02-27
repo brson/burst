@@ -9,7 +9,7 @@ use core::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT, Ordering};
 
 static HEAP_POISONED: AtomicBool = ATOMIC_BOOL_INIT;
 
-pub fn poison() {
+pub fn poison_heap() {
     HEAP_POISONED.store(true, Ordering::SeqCst);
 }
 

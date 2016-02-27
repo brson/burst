@@ -1,48 +1,41 @@
 //! Every collection is the same as in std, except that every function that
 //! can allocate or deallocate is parameterized over Heap.
 //!
-//! * Replace the allocator with bump allocator
 //! * Make panic not allocate
 //! * Poison allocator after heap is dropped
-//! * Provide collections parameterized over an allocator
 //! * Provide lang start
+//! * Run mlockall
+//! * Touch all stacks
 
 #![feature(lang_items)]
-#![feature(collections)]
-#![feature(collections_range)]
-#![feature(alloc)]
 #![no_std]
 
-// Rust runtime crates
-extern crate alloc as ralloc;
-extern crate collections as rcollections;
+// Burst realtime data structures
+extern crate burst_core as bcore;
 
-// The burst platform abstraction layer
-extern crate burst_pal_linux as pal;
+// Burst platform abstraction layer
+extern crate burst_pal_linux as bpal;
 
-use core::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT, Ordering};
+#[macro_use]
+extern crate log;
 
-pub fn open() -> Cap {
-    static OPENED: AtomicBool = ATOMIC_BOOL_INIT;
-    let old = OPENED.swap(true, Ordering::SeqCst);
-    if !old {
-        Cap(())
-    } else {
-        panic!("burst::open called twice")
-    }
-}
-
-pub fn poison() {
-    // Poison the heap so no more allocations can be made.
-    pal::alloc::poison();
-}
-
-pub struct Cap(());
-
-pub mod collections {
-    pub mod vec;
-}
+pub use bcore::Cap;
+pub use bcore::collections;
 
 pub mod thread;
+pub mod io;
+
+pub fn open() -> Cap {
+    let cap = bcore::open();
+
+    logger::init(&cap);
+
+    info!("");
+    info!(r"* \(^.^)/ ** get ready to burst ** \(^.^)/ *");
+    info!("");
+
+    cap
+}
 
 mod rt;
+mod logger;

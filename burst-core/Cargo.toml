@@ -1,9 +1,8 @@
 [package]
-name = "burst"
+name = "burst-core"
 version = "0.1.0"
 authors = ["Brian Anderson <banderson@mozilla.com>"]
 
 [dependencies]
-burst-core = { path = "burst-core" }
-burst-pal-linux = { path = "burst-pal-linux" }
+burst-core-pal-linux = { path = "../burst-core-pal-linux" }
 log = { version = "0.3.5", default-features = false }
