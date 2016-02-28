@@ -18,8 +18,11 @@ pub fn end_setup() {
     // Lock memory at the end of setup so that failures
     // will be logged.
     alloc::lock_memory();
-    burst_alloc::poison_heap()
+    burst_alloc::poison_heap();
+    // TODO: tell glibc not to release memory to the OS
 }
+
+pub mod rand;
 
 mod alloc {
     use libc;

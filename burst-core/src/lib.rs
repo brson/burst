@@ -4,6 +4,12 @@
 #![feature(alloc)]
 #![feature(coerce_unsized)]
 #![feature(unsize)]
+#![feature(unsafe_no_drop_flag)]
+#![feature(dropck_parametricity)]
+#![feature(heap_api)]
+#![feature(unique)]
+#![feature(oom)]
+#![feature(filling_drop)]
 #![no_std]
 
 // Rust runtime crates
@@ -15,6 +21,16 @@ extern crate burst_core_pal_linux as bcpal;
 
 #[macro_use]
 extern crate log;
+
+pub mod boxed;
+
+pub mod collections {
+    pub mod vec;
+    pub mod hash;
+
+    // copied from stdhash
+    mod stdhash;
+}
 
 use core::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT, Ordering};
 
@@ -36,13 +52,7 @@ impl Drop for Cap {
     fn drop(&mut self) {
         bcpal::end_setup();
 
-        info!("startup completed. it's realtime");
+        debug!("startup completed. it's realtime");
     }
-}
-
-pub mod boxed;
-
-pub mod collections {
-    pub mod vec;
 }
 

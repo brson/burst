@@ -6,8 +6,10 @@ use libc::c_int;
 
 #[lang = "panic_fmt"]
 #[unwind]
-extern fn rust_begin_unwind(_msg: core::fmt::Arguments,
-                                _file: &'static str, _line: u32) -> ! {
+extern fn rust_begin_unwind(msg: core::fmt::Arguments,
+                            file: &'static str, line: u32) -> ! {
+    error!("{}", msg);
+    error!("{}:{}", file, line);
     unsafe { core::intrinsics::abort() }
 }
 
