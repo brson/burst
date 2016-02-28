@@ -10,17 +10,14 @@ fn main() {
     // Acquire the singleton setup token
     let st = burst::begin_setup();
 
-    // Do setup work
+    // Do non-realtime setup and allocation
 
-    // Create a vector
+    // Build a Vec and HashMap
     let mut v = Vec::new();
     v.push(&st, 1);
 
-    // Build a hash table
     let mut map: HashMap<u8, u8> = HashMap::new();
     map.insert(&st, 1, 2);
-    map.insert(&st, 2, 1);
-    map.insert(&st, 5, 2);
 
     // Reserve some space
     v.reserve_exact(&st, 100);
@@ -30,12 +27,13 @@ fn main() {
     burst::thread::spawn(&st, move || {
     });
 
-    // Poison the heap, page in and lock memory.
+    // Drop setup token, poison the heap, page in and lock memory.
     burst::end_setup(st);
 
     // Run realtime application logic.
-    info!("hello, world");
 
+    // We can still modify our basic collection types, as long as they
+    // don't exceed their capacity.
     for i in 0..100 {
         assert!(!v.at_capacity());
         v.push_noalloc(i);
@@ -46,4 +44,7 @@ fn main() {
         assert!(!map.at_capacity());
         map.insert_noalloc(i, i);
     }
+
+    // Built-in logger. Not yet realtime friendly.
+    info!("hello, world");
 }
