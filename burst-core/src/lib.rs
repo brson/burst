@@ -22,6 +22,33 @@ extern crate burst_core_pal_linux as bcpal;
 #[macro_use]
 extern crate log;
 
+use core::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT, Ordering};
+
+pub fn begin_setup() -> St {
+    static OPENED: AtomicBool = ATOMIC_BOOL_INIT;
+    let old = OPENED.swap(true, Ordering::SeqCst);
+    if !old {
+        bcpal::begin_setup();
+
+        St(())
+    } else {
+        panic!("burst::open called twice")
+    }
+}
+
+pub fn end_setup(_: St) { }
+
+/// Setup token
+pub struct St(());
+
+impl Drop for St {
+    fn drop(&mut self) {
+        bcpal::end_setup();
+
+        debug!("startup completed");
+    }
+}
+
 pub mod boxed;
 
 pub mod collections {
@@ -30,29 +57,6 @@ pub mod collections {
 
     // copied from stdhash
     mod stdhash;
+
+    static CAPACITY: &'static str = "capacity exceeded";
 }
-
-use core::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT, Ordering};
-
-pub fn open() -> Cap {
-    static OPENED: AtomicBool = ATOMIC_BOOL_INIT;
-    let old = OPENED.swap(true, Ordering::SeqCst);
-    if !old {
-        bcpal::begin_setup();
-
-        Cap(())
-    } else {
-        panic!("burst::open called twice")
-    }
-}
-
-pub struct Cap(());
-
-impl Drop for Cap {
-    fn drop(&mut self) {
-        bcpal::end_setup();
-
-        debug!("startup completed. it's realtime");
-    }
-}
-

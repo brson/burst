@@ -3,8 +3,9 @@
 // * Extend
 // * Cow
 
+use St;
 use core;
-use Cap;
+use collections::CAPACITY;
 use rcollections::vec::Vec as RVec;
 use rcollections::range::RangeArgument;
 use ralloc::boxed::Box;
@@ -13,25 +14,71 @@ pub struct Vec<T>(RVec<T>);
 pub use rcollections::vec::Drain;
 pub use rcollections::vec::IntoIter;
 
+// The allocating functions on Vec, augmented with
+// the setup token, and their noalloc counterparts,
+// which can be used after the setup phase, but panic
+// if the capacity is exceeded.
 impl<T> Vec<T> {
-    pub fn new() -> Vec<T> { Vec(RVec::new()) }
-    pub fn with_capacity(_: &Cap, capacity: usize) -> Vec<T> {
+    pub fn with_capacity(_: &St, capacity: usize) -> Vec<T> {
         Vec(RVec::with_capacity(capacity))
     }
+    pub fn reserve(&mut self, _: &St, additional: usize) {
+        self.0.reserve(additional)
+    }
+    pub fn reserve_exact(&mut self, _: &St, additional: usize) {
+        self.0.reserve_exact(additional)
+    }
+    pub fn shrink_to_fit(&mut self, _: &St) {
+        self.0.shrink_to_fit()
+    }
+    pub fn split_off(&mut self, _: &St, at: usize) -> Self {
+        Vec(self.0.split_off(at))
+    }
+
+    pub fn push(&mut self, _: &St, value: T) {
+        self.0.push(value)
+    }
+    pub fn insert(&mut self, _: &St, index: usize, element: T) {
+        self.0.insert(index, element)
+    }
+    pub fn append(&mut self, _: &St, other: &mut Self) {
+        self.0.append(&mut other.0)
+    }
+
+    pub fn push_noalloc(&mut self, value: T) {
+        if self.len() < self.capacity() {
+            self.0.push(value)
+        } else {
+            panic!("{}", CAPACITY)
+        }
+    }
+    pub fn insert_noalloc(&mut self, index: usize, element: T) {
+        if self.len() < self.capacity() {
+            self.0.insert(index, element)
+        } else {
+            panic!("{}", CAPACITY)
+        }
+    }
+    pub fn append_noalloc(&mut self, _: &St, other: &mut Self) {
+        // FIXME: overflow
+        if self.len() + other.len() <= self.capacity() {
+            self.0.append(&mut other.0)
+        } else {
+            panic!("{}", CAPACITY)
+        }
+    }
+    pub fn at_capacity(&self) -> bool {
+        self.len() == self.capacity()
+    }
+}
+
+impl<T> Vec<T> {
+    pub fn new() -> Vec<T> { Vec(RVec::new()) }
     pub unsafe fn from_raw_parts(ptr: *mut T, length: usize, capacity: usize) -> Vec<T> {
         Vec(RVec::from_raw_parts(ptr, length, capacity))
     }
     pub fn capacity(&self) -> usize {
         self.0.capacity()
-    }
-    pub fn reserve(&mut self, _: Cap, additional: usize) {
-        self.0.reserve(additional)
-    }
-    pub fn reserve_exact(&mut self, _: Cap, additional: usize) {
-        self.0.reserve_exact(additional)
-    }
-    pub fn shrink_to_fit(&mut self, _: Cap) {
-        self.0.shrink_to_fit()
     }
     pub fn into_boxed_slice(self) -> Box<[T]> {
         self.0.into_boxed_slice()
@@ -45,23 +92,14 @@ impl<T> Vec<T> {
     pub fn swap_remove(&mut self, index: usize) -> T {
         self.0.swap_remove(index)
     }
-    pub fn insert(&mut self, _: Cap, index: usize, element: T) {
-        self.0.insert(index, element)
-    }
     pub fn remove(&mut self, index: usize) -> T {
         self.0.remove(index)
     }
     pub fn retain<F>(&mut self, f: F) where F: FnMut(&T) -> bool {
         self.0.retain(f)
     }
-    pub fn push(&mut self, _: &Cap, value: T) {
-        self.0.push(value)
-    }
     pub fn pop(&mut self) -> Option<T> {
         self.0.pop()
-    }
-    pub fn append(&mut self, _: Cap, other: &mut Self) {
-        self.0.append(&mut other.0)
     }
     pub fn drain<R>(&mut self, range: R) -> Drain<T> where R: RangeArgument<usize> {
         self.0.drain(range)
@@ -74,9 +112,6 @@ impl<T> Vec<T> {
     }
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
-    }
-    pub fn split_off(&mut self, _: Cap, at: usize) -> Self {
-        Vec(self.0.split_off(at))
     }
 }
 

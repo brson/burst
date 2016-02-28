@@ -1,11 +1,11 @@
-use Cap;
+use St;
 use core;
 use ralloc::boxed::Box as RBox;
 
 pub struct Box<T: ?Sized>(RBox<T>);
 
 impl<T> Box<T> {
-    pub fn new(_: &Cap, x: T) -> Box<T> {
+    pub fn new(_: &St, x: T) -> Box<T> {
         Box(RBox::new(x))
     }
 

@@ -19,23 +19,28 @@ extern crate burst_pal_linux as bpal;
 #[macro_use]
 extern crate log;
 
-pub use bcore::Cap;
-pub use bcore::collections;
+pub fn begin_setup() -> St {
+    let st = bcore::begin_setup();
 
-pub mod thread;
-pub mod io;
-
-pub fn open() -> Cap {
-    let cap = bcore::open();
-
-    logger::init(&cap);
+    logger::init(&st);
 
     info!("");
     info!(r"* \(^.^)/ ** get ready to burst ** \(^.^)/ *");
     info!("");
 
-    cap
+    st
 }
+
+pub fn end_setup(st: St) {
+    bcore::end_setup(st);
+}
+
+pub use bcore::St;
+pub use bcore::boxed;
+pub use bcore::collections;
+
+pub mod thread;
+pub mod io;
 
 mod rt;
 mod logger;

@@ -1,4 +1,4 @@
-use Cap;
+use St;
 
 use bcore::boxed::Box;
 use core::mem;
@@ -7,11 +7,11 @@ use log::{self, MaxLogLevelFilter, Log, SetLoggerError,
           LogMetadata, LogRecord, LogLevelFilter, LogLevel};
 use io;
 
-pub fn init(cap: &Cap) {
+pub fn init(st: &St) {
     set_logger(|filter| {
         // FIXME: Set log level filter correctly
         filter.set(LogLevelFilter::Trace);
-        Box::new(cap, Logger(filter))
+        Box::new(st, Logger(filter))
     }).unwrap(); // FIXME: error handling
 
     // FIXME: this never calls shutdown_logger_raw

@@ -1,6 +1,7 @@
 pub mod map {
-    use Cap;
+    use St;
     use collections::stdhash::map::HashMap as RHashMap;
+    use collections::CAPACITY;
     use core::hash::{Hash, BuildHasher};
     use core::cmp::Eq;
     use core::borrow::Borrow;
@@ -14,22 +15,40 @@ pub mod map {
         pub fn new() -> HashMap<K, V, RandomState> {
             HashMap(RHashMap::new())
         }
-        pub fn with_capacity(_: &Cap, capacity: usize) -> HashMap<K, V, RandomState> {
+        pub fn with_capacity(_: &St, capacity: usize) -> HashMap<K, V, RandomState> {
             HashMap(RHashMap::with_capacity(capacity))
+        }
+    }
+
+    // Allocating operations
+    impl<K, V, S> HashMap<K, V, S> where K: Eq + Hash, S: BuildHasher {
+        pub fn reserve(&mut self, _: &St, additional: usize) {
+            self.0.reserve(additional)
+        }
+
+        pub fn shrink_to_fit(&mut self, _: &St) {
+            self.0.shrink_to_fit()
+        }
+
+        pub fn insert(&mut self, _: &St, k: K, v: V) -> Option<V> {
+            self.0.insert(k, v)
+        }
+
+        pub fn insert_noalloc(&mut self, k: K, v: V) -> Option<V> {
+            if self.0.len() < self.0.capacity() {
+                self.0.insert(k, v)
+            } else {
+                panic!("{}", CAPACITY);
+            }
+        }
+        pub fn at_capacity(&self) -> bool {
+            self.len() == self.capacity()
         }
     }
 
     impl<K, V, S> HashMap<K, V, S> where K: Eq + Hash, S: BuildHasher {
         pub fn capacity(&self) -> usize {
             self.0.capacity()
-        }
-
-        pub fn reserve(&mut self, _: &Cap, additional: usize) {
-            self.0.reserve(additional)
-        }
-
-        pub fn shrink_to_fit(&mut self, _: &Cap) {
-            self.0.shrink_to_fit()
         }
 
         pub fn keys<'a>(&'a self) -> Keys<'a, K, V> {
@@ -84,10 +103,6 @@ pub mod map {
             where K: Borrow<Q>, Q: Hash + Eq
         {
             self.0.get_mut(k)
-        }
-
-        pub fn insert(&mut self, _: &Cap, k: K, v: V) -> Option<V> {
-            self.0.insert(k, v)
         }
 
         pub fn remove<Q: ?Sized>(&mut self, k: &Q) -> Option<V>
