@@ -5,6 +5,7 @@ extern crate log;
 
 use burst::boxed::Box;
 use burst::rc::Rc;
+use burst::arc::Arc;
 
 fn main() {
     // Acquire the singleton setup token
@@ -15,8 +16,14 @@ fn main() {
     info!("box: {}", b);
 
     let r = Rc::new(&st, "what");
+    let r2 = r.clone();
 
-    info!("rc: {}", r);
+    info!("rc: {} {}", r, r2);
+
+    let r = Arc::new(&st, "the");
+    let r2 = r.clone();
+
+    info!("rc: {} {}", r, r2);
 
     burst::end_setup(st);
 
