@@ -37,6 +37,7 @@ pub fn end_setup(st: St) {
 
 pub use bcore::St;
 pub use bcore::boxed;
+pub use bcore::rc;
 pub use bcore::collections;
 
 pub mod thread;

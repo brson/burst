@@ -50,6 +50,8 @@ impl Drop for St {
 }
 
 pub mod boxed;
+pub mod rc;
+pub mod arc { /* TOOD */ }
 
 pub mod collections {
     pub mod vec;
