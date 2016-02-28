@@ -13,17 +13,17 @@ fn main() {
 
     let b = Box::new(&st, "hi");
 
-    info!("box: {}", b);
+    info!("{}", b);
 
     let r = Rc::new(&st, "what");
     let r2 = r.clone();
 
-    info!("rc: {} {}", r, r2);
+    info!("{} {}", r, r2);
 
     let r = Arc::new(&st, "the");
     let r2 = r.clone();
 
-    info!("rc: {} {}", r, r2);
+    info!("{} {}", r, r2);
 
     burst::end_setup(st);
 

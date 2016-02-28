@@ -40,9 +40,17 @@ impl Log for Logger {
         let level = record.level();
         let _target = record.target();
 
-        let _module_path = record.location().module_path();
+        let module_path = record.location().module_path();
         let _file = record.location().file();
         let _line = record.location().line();
+
+        let module_name = module_path.rfind("::").map(|i| {
+            &module_path[i + 2 ..]
+        }).unwrap_or(module_path);
+
+        let crate_name = module_path.find("::").map(|i| {
+            &module_path[ .. i]
+        }).unwrap_or(module_path);
 
         let mut stderr = io::stdio::stderr();
 
@@ -54,10 +62,17 @@ impl Log for Logger {
             LogLevel::Trace => "trace",
         };
 
-        let _ = writeln!(
-            &mut stderr,
-            "{} |{}",
-            level, args);
+        if module_name == crate_name {
+            let _ = writeln!(
+                &mut stderr,
+                "{}| {}: {}",
+                level, crate_name, args);
+        } else {
+            let _ = writeln!(
+                &mut stderr,
+                "{}| {}/{}: {}",
+                level, crate_name, module_name, args);
+        }
 
         /*let _ = writeln!(&mut stderr,
                          "      |{} {}:{}",
